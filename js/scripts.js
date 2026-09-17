@@ -1,500 +1,283 @@
-// =========================================
-// CONFIGURAÇÃO DO SUPABASE
-// =========================================
+/* =========================================================================
+   CONTROLE DOS NÚMEROS — seleção e registro das reservas
+   ========================================================================= */
 
-const SUPABASE_URL =
-    "https://ndtykmmfntaoixbskglw.supabase.co";
+(() => {
+    "use strict";
 
-const SUPABASE_KEY =
-    "sb_publishable_D7dMRtUAABCSP3g6znZSEg_3n-cqYiz";
+    /* ---------------------------------------------------------------------
+       CONFIGURAÇÃO
+       --------------------------------------------------------------------- */
 
+    const SUPABASE_URL = "https://ndtykmmfntaoixbskglw.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_D7dMRtUAABCSP3g6znZSEg_3n-cqYiz";
 
-const { createClient } = supabase;
+    const VALOR_POR_NUMERO = 10;
 
-
-const banco = createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
-
-
-// =========================================
-// CONFIGURAÇÕES
-// =========================================
-
-const valorPorNumero = 10;
+    const banco = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-// =========================================
-// ELEMENTOS
-// =========================================
+    /* ---------------------------------------------------------------------
+       ELEMENTOS
+       --------------------------------------------------------------------- */
 
-const numbersGrid =
-    document.getElementById("numbersGrid");
+    const el = id => document.getElementById(id);
 
-
-const numerosSelecionadosElemento =
-    document.getElementById(
-        "numerosSelecionados"
-    );
-
-
-const totalSelecionadoElemento =
-    document.getElementById(
-        "totalSelecionado"
-    );
+    const numbersGrid = el("numbersGrid");
+    const resumoNumeros = el("numerosSelecionados");
+    const resumoTotal = el("totalSelecionado");
+    const nomeParticipante = el("nomeParticipante");
+    const botaoSalvar = el("salvarReservaButton");
+    const avisos = el("avisos");
 
 
-const nomeParticipante =
-    document.getElementById(
-        "nomeParticipante"
-    );
+    /* ---------------------------------------------------------------------
+       ESTADO
+       --------------------------------------------------------------------- */
+
+    let selecionados = [];
 
 
-const salvarReservaButton =
-    document.getElementById(
-        "salvarReservaButton"
-    );
+    /* ---------------------------------------------------------------------
+       FORMATAÇÃO
+       --------------------------------------------------------------------- */
+
+    const moeda = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+
+    const dois = numero => String(numero).padStart(2, "0");
 
 
-// =========================================
-// NÚMEROS SELECIONADOS
-// =========================================
+    /* ---------------------------------------------------------------------
+       AVISOS (no lugar do alert)
+       --------------------------------------------------------------------- */
 
-let numerosSelecionados = [];
+    function mostrarAviso(mensagem, tipo = "ok") {
+        if (!avisos) {
+            console.log(mensagem);
+            return;
+        }
+
+        const aviso = document.createElement("div");
+        aviso.className = `toast toast--${tipo}`;
+        aviso.textContent = mensagem;
+
+        avisos.appendChild(aviso);
+
+        setTimeout(() => {
+            aviso.style.opacity = "0";
+            setTimeout(() => aviso.remove(), 300);
+        }, 3600);
+    }
+
+    window.mostrarAviso = mostrarAviso;
 
 
-// =========================================
-// CARREGAR NÚMEROS
-// =========================================
+    /* ---------------------------------------------------------------------
+       CARREGAR OS NÚMEROS
+       --------------------------------------------------------------------- */
 
-async function carregarNumeros() {
+    async function carregarNumeros() {
+        numbersGrid.setAttribute("aria-busy", "true");
 
-    numbersGrid.innerHTML = "";
+        const { data, error } = await banco
+            .from("rifa_numeros")
+            .select("numero, status, nome")
+            .order("numero", { ascending: true });
 
+        numbersGrid.removeAttribute("aria-busy");
 
-    const { data, error } = await banco
+        if (error) {
+            console.error("Erro ao carregar números:", error);
 
-        .from("rifa_numeros")
+            numbersGrid.innerHTML = `
+                <p class="erro-rifa">
+                    Não foi possível carregar os números. Verifique a conexão.
+                </p>
+            `;
 
-        .select(
-            "numero, status, nome"
-        )
+            return;
+        }
 
-        .order(
-            "numero",
-            {
-                ascending: true
+        const fragmento = document.createDocumentFragment();
+
+        for (const item of data) {
+            const botao = document.createElement("button");
+            botao.type = "button";
+            botao.textContent = dois(item.numero);
+
+            if (item.status === "disponivel") {
+                botao.className = "available";
+                botao.setAttribute("aria-pressed", "false");
+                botao.setAttribute("aria-label", `Número ${dois(item.numero)}, disponível`);
+
+                botao.addEventListener("click", () => alternar(item.numero, botao));
+
+            } else {
+                botao.className = "reserved";
+                botao.disabled = true;
+                botao.setAttribute(
+                    "aria-label",
+                    `Número ${dois(item.numero)}, reservado${item.nome ? ` para ${item.nome}` : ""}`
+                );
+
+                if (item.nome) botao.title = `Reservado para ${item.nome}`;
             }
-        );
 
+            fragmento.appendChild(botao);
+        }
 
-    // =====================================
-    // ERRO
-    // =====================================
+        numbersGrid.replaceChildren(fragmento);
 
-    if (error) {
-
-        console.error(
-            "Erro ao carregar números:",
-            error
-        );
-
-
-        numbersGrid.innerHTML = `
-
-            <p class="erro-rifa">
-
-                Não foi possível carregar
-                os números.
-
-            </p>
-
-        `;
-
-        return;
+        atualizarResumo();
     }
 
 
-    // =====================================
-    // CRIAR BOTÕES
-    // =====================================
+    /* ---------------------------------------------------------------------
+       SELECIONAR / DESSELECIONAR
+       --------------------------------------------------------------------- */
 
-    data.forEach(item => {
+    function alternar(numero, botao) {
+        const indice = selecionados.indexOf(numero);
 
-        const botao =
-            document.createElement(
-                "button"
-            );
-
-
-        const numeroFormatado =
-            String(item.numero)
-                .padStart(2, "0");
-
-
-        botao.textContent =
-            numeroFormatado;
-
-
-        // =================================
-        // DISPONÍVEL
-        // =================================
-
-        if (
-            item.status === "disponivel"
-        ) {
-
-            botao.classList.add(
-                "available"
-            );
-
-
-            botao.addEventListener(
-                "click",
-                () => selecionarNumero(
-                    item.numero,
-                    botao
-                )
-            );
-
+        if (indice !== -1) {
+            selecionados.splice(indice, 1);
+            botao.classList.remove("selected");
+            botao.classList.add("available");
+            botao.setAttribute("aria-pressed", "false");
+        } else {
+            selecionados.push(numero);
+            botao.classList.remove("available");
+            botao.classList.add("selected");
+            botao.setAttribute("aria-pressed", "true");
         }
 
-
-        // =================================
-        // RESERVADO
-        // =================================
-
-        else {
-
-            botao.classList.add(
-                "reserved"
-            );
+        atualizarResumo();
+    }
 
 
-            botao.disabled = true;
+    /* ---------------------------------------------------------------------
+       RESUMO
+       --------------------------------------------------------------------- */
 
-
-            if (item.nome) {
-
-                botao.title =
-                    `Reservado para ${item.nome}`;
-
-            }
-
+    function atualizarResumo() {
+        if (selecionados.length === 0) {
+            resumoNumeros.textContent = "Nenhum número selecionado";
+            resumoTotal.textContent = moeda.format(0);
+            botaoSalvar.disabled = false;
+            return;
         }
 
+        const ordenados = [...selecionados].sort((a, b) => a - b);
 
-        numbersGrid.appendChild(
-            botao
-        );
+        resumoNumeros.textContent = ordenados.map(dois).join(", ");
+        resumoTotal.textContent = moeda.format(selecionados.length * VALOR_POR_NUMERO);
+    }
 
+
+    /* ---------------------------------------------------------------------
+       SALVAR A RESERVA
+       --------------------------------------------------------------------- */
+
+    async function salvarReserva() {
+        if (selecionados.length === 0) {
+            mostrarAviso("Selecione pelo menos um número.", "error");
+            return;
+        }
+
+        const nome = nomeParticipante.value.trim();
+
+        if (!nome) {
+            mostrarAviso("Digite o nome da pessoa.", "error");
+            nomeParticipante.focus();
+            return;
+        }
+
+        botaoSalvar.disabled = true;
+        botaoSalvar.textContent = "Salvando…";
+
+        const { data, error } = await banco.rpc("salvar_reserva", {
+            p_numeros: selecionados,
+            p_nome: nome
+        });
+
+        botaoSalvar.disabled = false;
+        botaoSalvar.textContent = "Salvar reserva";
+
+        if (error) {
+            console.error("Erro ao salvar reserva:", error);
+            mostrarAviso(error.message || "Não foi possível salvar a reserva.", "error");
+
+            /* Alguém pode ter reservado o número no meio do caminho. */
+            selecionados = [];
+            await carregarNumeros();
+            return;
+        }
+
+        const salvos = data.map(item => dois(item.numero)).join(", ");
+        const total = moeda.format(selecionados.length * VALOR_POR_NUMERO);
+
+        mostrarAviso(`Reserva de ${nome} salva: ${salvos} — ${total}`);
+
+        selecionados = [];
+        nomeParticipante.value = "";
+
+        await carregarNumeros();
+    }
+
+
+    /* ---------------------------------------------------------------------
+       COPIAR A CHAVE PIX
+       --------------------------------------------------------------------- */
+
+    async function copiarPix() {
+        const chave = el("chavePix").textContent.trim();
+
+        try {
+            await navigator.clipboard.writeText(chave);
+            mostrarAviso("Chave PIX copiada!");
+        } catch {
+            /* Alguns navegadores bloqueiam a área de transferência em http. */
+            const campo = document.createElement("textarea");
+            campo.value = chave;
+            campo.setAttribute("readonly", "");
+            campo.style.position = "fixed";
+            campo.style.opacity = "0";
+            document.body.appendChild(campo);
+            campo.select();
+
+            const deuCerto = document.execCommand("copy");
+            campo.remove();
+
+            mostrarAviso(
+                deuCerto ? "Chave PIX copiada!" : "Copie a chave manualmente: " + chave,
+                deuCerto ? "ok" : "error"
+            );
+        }
+    }
+
+
+    /* ---------------------------------------------------------------------
+       EVENTOS
+       --------------------------------------------------------------------- */
+
+    botaoSalvar.addEventListener("click", salvarReserva);
+
+    el("botaoCopiarPix").addEventListener("click", copiarPix);
+
+    nomeParticipante.addEventListener("keydown", evento => {
+        if (evento.key === "Enter") {
+            evento.preventDefault();
+            salvarReserva();
+        }
     });
 
 
-    atualizarResumo();
-}
-
-
-// =========================================
-// SELECIONAR NÚMERO
-// =========================================
-
-function selecionarNumero(
-    numero,
-    botao
-) {
-
-    const indice =
-        numerosSelecionados.indexOf(
-            numero
-        );
-
-
-    // =====================================
-    // DESMARCAR
-    // =====================================
-
-    if (indice !== -1) {
-
-        numerosSelecionados.splice(
-            indice,
-            1
-        );
-
-
-        botao.classList.remove(
-            "selected"
-        );
-
-
-        botao.classList.add(
-            "available"
-        );
-
-    }
-
-
-    // =====================================
-    // MARCAR
-    // =====================================
-
-    else {
-
-        numerosSelecionados.push(
-            numero
-        );
-
-
-        botao.classList.remove(
-            "available"
-        );
-
-
-        botao.classList.add(
-            "selected"
-        );
-
-    }
-
-
-    atualizarResumo();
-}
-
-
-// =========================================
-// ATUALIZAR RESUMO
-// =========================================
-
-function atualizarResumo() {
-
-    if (
-        numerosSelecionados.length === 0
-    ) {
-
-        numerosSelecionadosElemento.textContent =
-            "Nenhum número selecionado";
-
-
-        totalSelecionadoElemento.textContent =
-            "R$ 0,00";
-
-
-        return;
-    }
-
-
-    const numerosOrdenados =
-        [...numerosSelecionados]
-            .sort(
-                (a, b) => a - b
-            );
-
-
-    const numerosFormatados =
-        numerosOrdenados.map(
-            numero =>
-                String(numero)
-                    .padStart(2, "0")
-        );
-
-
-    const total =
-        numerosSelecionados.length *
-        valorPorNumero;
-
-
-    numerosSelecionadosElemento.textContent =
-        numerosFormatados.join(", ");
-
-
-    totalSelecionadoElemento.textContent =
-        `R$ ${total
-            .toFixed(2)
-            .replace(".", ",")}`;
-}
-
-
-// =========================================
-// SALVAR RESERVA
-// =========================================
-
-async function salvarReserva() {
-
-    // =====================================
-    // VERIFICAR NÚMEROS
-    // =====================================
-
-    if (
-        numerosSelecionados.length === 0
-    ) {
-
-        alert(
-            "Selecione pelo menos um número."
-        );
-
-        return;
-    }
-
-
-    // =====================================
-    // VERIFICAR NOME
-    // =====================================
-
-    const nome =
-        nomeParticipante.value.trim();
-
-
-    if (!nome) {
-
-        alert(
-            "Digite o nome da pessoa."
-        );
-
-
-        nomeParticipante.focus();
-
-
-        return;
-    }
-
-
-    // =====================================
-    // DESABILITAR BOTÃO
-    // =====================================
-
-    salvarReservaButton.disabled =
-        true;
-
-
-    salvarReservaButton.textContent =
-        "Salvando...";
-
-
-    // =====================================
-    // ENVIAR PARA O SUPABASE
-    // =====================================
-
-    const { data, error } =
-        await banco.rpc(
-            "salvar_reserva",
-            {
-                p_numeros:
-                    numerosSelecionados,
-
-                p_nome:
-                    nome
-            }
-        );
-
-
-    // =====================================
-    // ERRO
-    // =====================================
-
-    if (error) {
-
-        console.error(
-            "Erro ao salvar reserva:",
-            error
-        );
-
-
-        alert(
-            error.message ||
-            "Não foi possível salvar a reserva."
-        );
-
-
-        salvarReservaButton.disabled =
-            false;
-
-
-        salvarReservaButton.textContent =
-            "Salvar reserva";
-
-
-        await carregarNumeros();
-
-
-        return;
-    }
-
-
-    // =====================================
-    // SUCESSO
-    // =====================================
-
-    const numerosSalvos =
-        data
-            .map(item =>
-                String(item.numero)
-                    .padStart(2, "0")
-            )
-            .join(", ");
-
-
-    const total =
-        numerosSelecionados.length *
-        valorPorNumero;
-
-
-    alert(
-
-        `Reserva salva com sucesso!\n\n` +
-
-        `Pessoa: ${nome}\n` +
-
-        `Números: ${numerosSalvos}\n` +
-
-        `Total: R$ ${total
-            .toFixed(2)
-            .replace(".", ",")}`
-
-    );
-
-
-    // =====================================
-    // LIMPAR SELEÇÃO
-    // =====================================
-
-    numerosSelecionados = [];
-
-
-    nomeParticipante.value = "";
-
-
-    atualizarResumo();
-
-
-    salvarReservaButton.disabled =
-        false;
-
-
-    salvarReservaButton.textContent =
-        "Salvar reserva";
-
-
-    // =====================================
-    // RECARREGAR NÚMEROS
-    // =====================================
-
-    await carregarNumeros();
-}
-
-
-// =========================================
-// EVENTO DO BOTÃO
-// =========================================
-
-salvarReservaButton.addEventListener(
-    "click",
-    salvarReserva
-);
-
-
-// =========================================
-// INICIAR
-// =========================================
-
-carregarNumeros();
+    /* ---------------------------------------------------------------------
+       INÍCIO
+       --------------------------------------------------------------------- */
+
+    carregarNumeros();
+})();

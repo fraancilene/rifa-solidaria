@@ -4,19 +4,31 @@
 <head>
 
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Reservas | Rifa Solidária</title>
 
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
+    <meta name="description" content="Controle das reservas da rifa solidária em prol dos cuidados de Maria.">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#b04066">
+    <meta name="robots" content="noindex">
 
+    <link rel="icon"
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23b04066'/%3E%3Cpath d='M16 25S6 18.7 6 12.8A5.3 5.3 0 0 1 16 10a5.3 5.3 0 0 1 10 2.8C26 18.7 16 25 16 25z' fill='%23f0d58b'/%3E%3C/svg%3E">
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Fontes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Aparência: aplicada antes da primeira pintura para não piscar o tema -->
+    <script src="js/tema.js"></script>
+
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 </head>
@@ -25,23 +37,41 @@
 <body>
 
 
-    <header class="hero">
-
-        <div class="hero-content">
-
-            <span class="tag">
-                ♥ RIFA SOLIDÁRIA ♥
-            </span>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
 
 
-            <h1>
-                RESERVAS
-            </h1>
+    <!-- =====================================================================
+         BARRA SUPERIOR
+    ====================================================================== -->
 
+    <header class="topbar">
 
-            <h2>
-                CONTROLE DA RIFA
-            </h2>
+        <a class="topbar__back" href="index.html">
+            <span aria-hidden="true">←</span>
+            <span>Números</span>
+        </a>
+
+        <div class="topbar__title">
+            <h1>Reservas</h1>
+            <span class="topbar__subtitle">Rifa em prol dos cuidados de Maria</span>
+        </div>
+
+        <div class="topbar__actions">
+
+            <button type="button" class="btn btn--ghost btn--icon" id="botaoImprimir"
+                    title="Imprimir a lista" aria-label="Imprimir a lista">
+                <span aria-hidden="true">🖨</span>
+            </button>
+
+            <button type="button" class="btn" id="botaoExportar" title="Exportar para CSV">
+                <span aria-hidden="true">⤓</span>
+                <span class="btn__label">Exportar</span>
+            </button>
+
+            <button type="button" class="btn btn--primary" id="botaoAtualizar" title="Atualizar a lista">
+                <span aria-hidden="true">↻</span>
+                <span class="btn__label">Atualizar</span>
+            </button>
 
         </div>
 
@@ -49,365 +79,308 @@
 
 
 
-    <main>
+    <main class="page" id="conteudo">
 
 
-        <section class="section">
+        <!-- =================================================================
+             INDICADORES
+        ================================================================== -->
 
-            <div class="section-title">
+        <section class="stats" aria-label="Resumo da rifa">
 
-                <span>♥</span>
+            <article class="stat stat--money">
+                <span class="stat__label">Total arrecadado</span>
+                <strong class="stat__value" id="statTotal">—</strong>
+                <span class="stat__hint" id="statTotalDica">R$ 10,00 por número</span>
+            </article>
 
-                <h2>
-                    Pessoas e números
-                </h2>
+            <article class="stat">
+                <span class="stat__label">Números reservados</span>
+                <strong class="stat__value" id="statNumeros">—</strong>
+                <span class="stat__hint" id="statProgressoTexto">Carregando…</span>
+                <div class="progress" role="progressbar" aria-labelledby="statProgressoTexto"
+                     aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div class="progress__bar" id="statProgressoBarra"></div>
+                </div>
+            </article>
 
-                <span>♥</span>
+            <article class="stat stat--people">
+                <span class="stat__label">Participantes</span>
+                <strong class="stat__value" id="statPessoas">—</strong>
+                <span class="stat__hint" id="statMedia">—</span>
+            </article>
+
+            <article class="stat stat--paid">
+                <span class="stat__label">Já pagos</span>
+                <strong class="stat__value" id="statPagos">—</strong>
+                <span class="stat__hint" id="statPagosDica">—</span>
+            </article>
+
+        </section>
+
+
+        <!-- =================================================================
+             FILTROS
+        ================================================================== -->
+
+        <section class="toolbar" aria-label="Filtrar e ordenar">
+
+            <div class="search">
+
+                <span class="search__icon" aria-hidden="true">🔍</span>
+
+                <label class="sr-only" for="campoBusca">Buscar por nome ou número</label>
+
+                <input class="field" type="search" id="campoBusca" autocomplete="off"
+                       placeholder="Buscar por nome ou número…" enterkeyhint="search">
+
+                <button type="button" class="search__clear" id="limparBusca" hidden
+                        aria-label="Limpar a busca">✕</button>
 
             </div>
 
+            <div class="segmented" role="group" aria-label="Filtrar por situação">
+                <button type="button" data-filtro="todos"    aria-pressed="true">Todos</button>
+                <button type="button" data-filtro="pago"     aria-pressed="false">Pagos</button>
+                <button type="button" data-filtro="reservado" aria-pressed="false">Pendentes</button>
+            </div>
 
-            <div class="table-container">
+            <label class="sr-only" for="campoOrdem">Ordenar por</label>
+
+            <select class="select" id="campoOrdem">
+                <option value="nome">Nome (A–Z)</option>
+                <option value="quantidade">Mais números</option>
+                <option value="total">Maior valor</option>
+                <option value="recente">Menor número primeiro</option>
+            </select>
+
+        </section>
+
+
+        <!-- =================================================================
+             LISTA
+        ================================================================== -->
+
+        <section class="panel" aria-label="Pessoas e números">
+
+            <header class="panel__head">
+                <h2>Pessoas e números</h2>
+                <span class="panel__count" id="contador" role="status" aria-live="polite"></span>
+            </header>
+
+
+            <!-- CARREGANDO -->
+
+            <div id="estadoCarregando">
+                <div class="skeleton-row">
+                    <span class="sk sk--avatar"></span>
+                    <span class="sk sk--name"></span>
+                    <span class="sk sk--nums"></span>
+                    <span class="sk sk--qty"></span>
+                    <span class="sk sk--total"></span>
+                </div>
+                <div class="skeleton-row">
+                    <span class="sk sk--avatar"></span>
+                    <span class="sk sk--name"></span>
+                    <span class="sk sk--nums"></span>
+                    <span class="sk sk--qty"></span>
+                    <span class="sk sk--total"></span>
+                </div>
+                <div class="skeleton-row">
+                    <span class="sk sk--avatar"></span>
+                    <span class="sk sk--name"></span>
+                    <span class="sk sk--nums"></span>
+                    <span class="sk sk--qty"></span>
+                    <span class="sk sk--total"></span>
+                </div>
+                <span class="sr-only">Carregando as reservas…</span>
+            </div>
+
+
+            <!-- ERRO -->
+
+            <div class="state state--error" id="estadoErro" hidden>
+                <span class="state__icon" aria-hidden="true">⚠️</span>
+                <p class="state__title">Não foi possível carregar</p>
+                <p class="state__text" id="mensagemErro">
+                    Verifique a conexão e tente novamente.
+                </p>
+                <button type="button" class="btn btn--primary" id="botaoTentarNovamente">
+                    Tentar novamente
+                </button>
+            </div>
+
+
+            <!-- NENHUMA RESERVA -->
+
+            <div class="state" id="estadoVazio" hidden>
+                <span class="state__icon" aria-hidden="true">🎟️</span>
+                <p class="state__title">Nenhuma reserva ainda</p>
+                <p class="state__text">
+                    Assim que os primeiros números forem reservados, eles aparecem aqui.
+                </p>
+                <a class="btn btn--primary" href="index.html">Reservar números</a>
+            </div>
+
+
+            <!-- BUSCA SEM RESULTADO -->
+
+            <div class="state" id="estadoSemResultado" hidden>
+                <span class="state__icon" aria-hidden="true">🔎</span>
+                <p class="state__title">Nada encontrado</p>
+                <p class="state__text" id="textoSemResultado">
+                    Tente outro nome ou número.
+                </p>
+                <button type="button" class="btn" id="botaoLimparFiltros">
+                    Limpar filtros
+                </button>
+            </div>
+
+
+            <!-- TABELA -->
+
+            <div class="table-scroll" id="areaTabela" hidden>
 
                 <table>
 
+                    <caption class="sr-only">
+                        Pessoas que reservaram números, com a quantidade e o valor correspondente
+                    </caption>
+
                     <thead>
-
                         <tr>
-
-                            <th>
-                                Pessoa
+                            <th scope="col" data-coluna="nome" aria-sort="ascending">
+                                <button type="button">Pessoa</button>
                             </th>
-
-                            <th>
-                                Números
+                            <th scope="col">Números</th>
+                            <th scope="col" data-coluna="quantidade">
+                                <button type="button">Qtd.</button>
                             </th>
-
-                            <th>
-                                Quantidade
+                            <th scope="col" data-coluna="total">
+                                <button type="button">Total</button>
                             </th>
-
-                            <th>
-                                Total
-                            </th>
-
+                            <th scope="col">Situação</th>
+                            <th scope="col"><span class="sr-only">Ações</span></th>
                         </tr>
-
                     </thead>
 
-
-                    <tbody id="reservasTabela">
-
-                    </tbody>
+                    <tbody id="reservasTabela"></tbody>
 
                 </table>
 
             </div>
 
 
-            <div
-                id="resumoReservas"
-                class="selection-box"
-            >
+            <!-- TOTAIS -->
 
-            </div>
+            <footer class="panel__foot" id="rodapeTabela" hidden>
 
+                <dl>
+                    <div>
+                        <dt>Exibindo</dt>
+                        <dd id="rodapePessoas">—</dd>
+                    </div>
+                    <div>
+                        <dt>Números</dt>
+                        <dd id="rodapeNumeros">—</dd>
+                    </div>
+                    <div>
+                        <dt>Valor</dt>
+                        <dd id="rodapeValor">—</dd>
+                    </div>
+                </dl>
 
-            <a
-                href="index.html"
-                class="reservas-link"
-            >
+                <span class="panel__count" id="atualizadoEm"></span>
 
-                ← Voltar para os números
-
-            </a>
-
+            </footer>
 
         </section>
-
 
     </main>
 
 
 
     <footer>
-
-        <p>
-            Rifa Solidária • 2026
-        </p>
-
-        <p>
-            Sorteio em 07/10/2026
-        </p>
-
+        <p>Rifa Solidária • 2026</p>
+        <p>Sorteio em 07/10/2026</p>
     </footer>
 
 
+    <!-- =====================================================================
+         DIÁLOGO: RENOMEAR PESSOA
+    ====================================================================== -->
 
-    <script>
+    <dialog class="dialog" id="dialogoNome">
 
-        const SUPABASE_URL =
-            "https://ndtykmmfntaoixbskglw.supabase.co";
+        <form method="dialog" id="formularioNome">
 
+            <header class="dialog__head">
+                <h2 id="tituloDialogo">Editar reserva</h2>
+                <p class="dialog__text" id="descricaoDialogo">
+                    Altere o nome e marque quais números já foram pagos.
+                </p>
+            </header>
 
-        const SUPABASE_KEY =
-            "sb_publishable_D7dMRtUAABCSP3g6znZSEg_3n-cqYiz";
+            <div class="dialog__body">
 
+                <div class="dialog__field">
 
-        const { createClient } =
-            supabase;
+                    <label class="dialog__label" for="campoNome">Nome da pessoa</label>
 
+                    <input class="field" type="text" id="campoNome" name="nome"
+                           autocomplete="off" required maxlength="80"
+                           aria-describedby="dicaDialogo">
 
-        const banco =
-            createClient(
-                SUPABASE_URL,
-                SUPABASE_KEY
-            );
-
-
-        const tabela =
-            document.getElementById(
-                "reservasTabela"
-            );
-
-
-        const resumo =
-            document.getElementById(
-                "resumoReservas"
-            );
-
-
-        const valorPorNumero = 10;
-
-
-        async function carregarReservas() {
-
-            const { data, error } =
-                await banco
-
-                    .from("rifa_numeros")
-
-                    .select(
-                        "numero, nome, status"
-                    )
-
-                    .in(
-                        "status",
-                        [
-                            "reservado",
-                            "pago"
-                        ]
-                    )
-
-                    .order(
-                        "numero",
-                        {
-                            ascending: true
-                        }
-                    );
-
-
-            if (error) {
-
-                console.error(
-                    error
-                );
-
-
-                tabela.innerHTML = `
-
-                    <tr>
-
-                        <td colspan="4">
-
-                            Não foi possível
-                            carregar as reservas.
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-                return;
-            }
-
-
-            if (
-                data.length === 0
-            ) {
-
-                tabela.innerHTML = `
-
-                    <tr>
-
-                        <td
-                            colspan="4"
-                        >
-
-                            Nenhuma reserva cadastrada.
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-                return;
-            }
-
-
-            // =================================
-            // AGRUPAR POR NOME
-            // =================================
-
-            const pessoas = {};
-
-
-            data.forEach(item => {
-
-                const nome =
-                    item.nome ||
-                    "Sem nome";
-
-
-                if (
-                    !pessoas[nome]
-                ) {
-
-                    pessoas[nome] = [];
-
-                }
-
-
-                pessoas[nome].push(
-                    item.numero
-                );
-
-            });
-
-
-            // =================================
-            // CRIAR TABELA
-            // =================================
-
-            tabela.innerHTML = "";
-
-
-            let totalNumeros = 0;
-
-
-            Object.keys(pessoas)
-                .sort()
-                .forEach(nome => {
-
-                    const numeros =
-                        pessoas[nome]
-                            .sort(
-                                (a, b) =>
-                                    a - b
-                            );
-
-
-                    const quantidade =
-                        numeros.length;
-
-
-                    const total =
-                        quantidade *
-                        valorPorNumero;
-
-
-                    totalNumeros +=
-                        quantidade;
-
-
-                    const numerosFormatados =
-                        numeros.map(
-                            numero =>
-                                String(numero)
-                                    .padStart(2, "0")
-                        );
-
-
-                    const linha =
-                        document.createElement(
-                            "tr"
-                        );
-
-
-                    linha.innerHTML = `
-
-                        <td>
-                            <strong>
-                                ${nome}
-                            </strong>
-                        </td>
-
-                        <td>
-                            ${numerosFormatados.join(", ")}
-                        </td>
-
-                        <td>
-                            ${quantidade}
-                        </td>
-
-                        <td>
-                            R$ ${total
-                                .toFixed(2)
-                                .replace(".", ",")}
-                        </td>
-
-                    `;
-
-
-                    tabela.appendChild(
-                        linha
-                    );
-
-                });
-
-
-            // =================================
-            // RESUMO
-            // =================================
-
-            resumo.innerHTML = `
-
-                <div>
-
-                    <span>
-                        NÚMEROS RESERVADOS
-                    </span>
-
-                    <strong>
-                        ${totalNumeros}
-                    </strong>
+                    <p class="dialog__hint" id="dicaDialogo"></p>
 
                 </div>
 
-                <div>
 
-                    <span>
-                        VALOR TOTAL
-                    </span>
+                <div class="dialog__field">
 
-                    <strong>
-                        R$ ${(totalNumeros * valorPorNumero)
-                            .toFixed(2)
-                            .replace(".", ",")}
-                    </strong>
+                    <div class="dialog__label-row">
+
+                        <span class="dialog__label" id="rotuloSituacao">Situação de cada número</span>
+
+                        <span class="dialog__actions">
+                            <button type="button" class="link-button" id="marcarTodosPagos">
+                                Todos pagos
+                            </button>
+                            <button type="button" class="link-button" id="marcarTodosPendentes">
+                                Todos pendentes
+                            </button>
+                        </span>
+
+                    </div>
+
+                    <p class="dialog__text">
+                        Toque num número para alternar entre pago e pendente.
+                    </p>
+
+                    <div class="num-toggles" id="numerosSituacao"
+                         role="group" aria-labelledby="rotuloSituacao"></div>
+
+                    <p class="dialog__hint" id="resumoSituacao"></p>
 
                 </div>
 
-            `;
+            </div>
 
-        }
+            <footer class="dialog__foot">
+                <button type="button" class="btn" id="cancelarNome">Cancelar</button>
+                <button type="submit" class="btn btn--primary" id="salvarNome">Salvar</button>
+            </footer>
+
+        </form>
+
+    </dialog>
 
 
-        carregarReservas();
+    <!-- Avisos -->
+    <div class="toasts" id="avisos" role="status" aria-live="polite"></div>
 
-    </script>
+
+    <script src="js/reservas.js"></script>
 
 
 </body>
