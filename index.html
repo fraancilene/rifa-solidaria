@@ -1,0 +1,680 @@
+```html
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Rifa Solidária | Cuidados da Maria</title>
+
+    <meta
+        name="description"
+        content="Controle da rifa solidária em prol dos cuidados de Maria."
+    >
+
+    <link rel="stylesheet" href="style.css">
+
+
+    <!-- Google Fonts -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- Supabase -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================
+         CABEÇALHO
+    ========================== -->
+
+    <header class="hero">
+
+        <div class="hero-content">
+
+            <span class="tag">
+                ♥ RIFA SOLIDÁRIA ♥
+            </span>
+
+
+            <h1>
+                RIFA
+            </h1>
+
+
+            <h2>
+                EM PROL DOS CUIDADOS DE MARIA
+            </h2>
+
+
+            <p class="hero-description">
+
+                Maria está internada em Goiânia e esta rifa foi criada
+                para ajudar com os custos relacionados aos seus cuidados.
+
+            </p>
+
+
+            <p class="hero-message">
+
+                "Sua ajuda é o que nos mantém de pé
+                quando tudo parece desabar."
+
+            </p>
+
+        </div>
+
+    </header>
+
+
+
+
+    <main>
+
+
+        <!-- =========================
+             SOBRE A RIFA
+        ========================== -->
+
+        <section class="section about">
+
+            <div class="section-title">
+
+                <span>♥</span>
+
+                <h2>
+                    Sobre a rifa
+                </h2>
+
+                <span>♥</span>
+
+            </div>
+
+
+            <p>
+
+                Esta é uma rifa solidária criada para ajudar com os
+                gastos relacionados aos cuidados de Maria, que está
+                internada em Goiânia.
+
+            </p>
+
+
+            <p>
+
+                Toda contribuição será muito importante neste momento.
+                Agradecemos de coração por todo apoio.
+
+            </p>
+
+        </section>
+
+
+
+
+        <!-- =========================
+             PRÊMIOS
+        ========================== -->
+
+        <section class="section prizes">
+
+            <div class="section-title">
+
+                <span>♥</span>
+
+                <h2>
+                    Serão 2 prêmios
+                </h2>
+
+                <span>♥</span>
+
+            </div>
+
+
+            <div class="prizes-container">
+
+
+                <!-- PRÊMIO 1 -->
+
+                <article class="prize-card">
+
+                    <div class="prize-icon">
+                        +
+                    </div>
+
+
+                    <div class="prize-content">
+
+                        <span class="prize-number">
+                            PRÊMIO 01
+                        </span>
+
+
+                        <h3>
+                            1 Sessão de Quiropraxia
+                        </h3>
+
+
+                        <p>
+                            Quiropraxia e recuperação de atletas
+                        </p>
+
+
+                        <span class="prize-business">
+                            Magnus
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+
+
+                <!-- PRÊMIO 2 -->
+
+                <article class="prize-card">
+
+                    <div class="prize-icon">
+                        🎁
+                    </div>
+
+
+                    <div class="prize-content">
+
+                        <span class="prize-number">
+                            PRÊMIO 02
+                        </span>
+
+
+                        <h3>
+                            Kit Nativa SPA
+                        </h3>
+
+
+                        <p>
+                            Ameixa Intensa — O Boticário
+                        </p>
+
+
+                        <div class="kit-items">
+
+                            <span>
+                                Body Splash
+                            </span>
+
+                            <span>
+                                Creme Corporal
+                            </span>
+
+                            <span>
+                                Óleo Glorioso
+                            </span>
+
+                            <span>
+                                Esfoliante Corporal
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+            </div>
+
+        </section>
+
+
+
+
+        <!-- =========================
+             INFORMAÇÕES
+        ========================== -->
+
+        <section class="info-section">
+
+
+            <div class="info-card">
+
+                <span class="info-icon">
+                    🎟️
+                </span>
+
+
+                <div>
+
+                    <span class="info-label">
+                        CADA NÚMERO
+                    </span>
+
+
+                    <strong>
+                        R$ 10,00
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+
+            <div class="info-card">
+
+                <span class="info-icon">
+                    📅
+                </span>
+
+
+                <div>
+
+                    <span class="info-label">
+                        DATA DO SORTEIO
+                    </span>
+
+
+                    <strong>
+                        07/10/2026
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+
+        <!-- =========================
+             CONTROLE DOS NÚMEROS
+        ========================== -->
+
+        <section class="section numbers-section">
+
+
+            <div class="section-title">
+
+                <span>♥</span>
+
+                <h2>
+                    Controle dos números
+                </h2>
+
+                <span>♥</span>
+
+            </div>
+
+
+            <p class="numbers-description">
+
+                Selecione os números escolhidos pela pessoa
+                e informe o nome para registrar a reserva.
+
+            </p>
+
+
+
+
+            <!-- LEGENDA -->
+
+            <div class="legend">
+
+
+                <div>
+
+                    <span class="legend-dot available"></span>
+
+                    Disponível
+
+                </div>
+
+
+
+                <div>
+
+                    <span class="legend-dot selected"></span>
+
+                    Selecionado
+
+                </div>
+
+
+
+                <div>
+
+                    <span class="legend-dot reserved"></span>
+
+                    Reservado
+
+                </div>
+
+
+            </div>
+
+
+
+
+            <!-- NÚMEROS -->
+
+            <div
+                class="numbers-grid"
+                id="numbersGrid"
+            >
+
+                <!--
+                    Os 150 números serão carregados
+                    automaticamente pelo JavaScript.
+                -->
+
+            </div>
+
+
+
+
+            <!-- RESUMO DOS NÚMEROS -->
+
+            <div class="selection-box">
+
+
+                <div>
+
+                    <span>
+                        NÚMEROS ESCOLHIDOS
+                    </span>
+
+
+                    <strong id="numerosSelecionados">
+
+                        Nenhum número selecionado
+
+                    </strong>
+
+                </div>
+
+
+
+
+                <div>
+
+                    <span>
+                        TOTAL
+                    </span>
+
+
+                    <strong id="totalSelecionado">
+
+                        R$ 0,00
+
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+
+
+            <!-- NOME DA PESSOA -->
+
+            <div class="participant-fields">
+
+                <label for="nomeParticipante">
+                    Nome da pessoa
+                </label>
+
+
+                <input
+                    type="text"
+                    id="nomeParticipante"
+                    placeholder="Digite o nome da pessoa"
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+
+
+            <!-- BOTÃO SALVAR -->
+
+            <button
+                type="button"
+                class="main-button"
+                id="salvarReservaButton"
+            >
+
+                Salvar reserva
+
+            </button>
+
+
+
+
+            <!-- LINK PARA A PÁGINA DE RESERVAS -->
+
+            <a
+                href="reservas.html"
+                class="reservas-link"
+            >
+
+                📋 Ver reservas cadastradas
+
+            </a>
+
+
+        </section>
+
+
+
+
+        <!-- =========================
+             PAGAMENTO
+        ========================== -->
+
+        <section class="section payment">
+
+
+            <div class="section-title">
+
+                <span>♥</span>
+
+                <h2>
+                    Pagamento via PIX
+                </h2>
+
+                <span>♥</span>
+
+            </div>
+
+
+
+
+            <div class="pix-card">
+
+
+                <div class="pix-info">
+
+                    <span>
+                        CHAVE PIX
+                    </span>
+
+
+                    <strong>
+                        61993375979
+                    </strong>
+
+
+                    <p>
+                        Lilian Pereira da Silva
+                    </p>
+
+
+                    <small>
+                        Banco: PicPay
+                    </small>
+
+                </div>
+
+
+
+
+                <button
+                    class="pix-button"
+                    type="button"
+                    onclick="copiarPix()"
+                >
+
+                    📋 Copiar PIX
+
+                </button>
+
+
+            </div>
+
+        </section>
+
+
+
+
+        <!-- =========================
+             AGRADECIMENTO
+        ========================== -->
+
+        <section class="thank-you">
+
+
+            <span class="heart">
+                ♥
+            </span>
+
+
+            <h2>
+                Faça sua ajuda chegar até Maria
+            </h2>
+
+
+            <p>
+
+                Cada participação faz diferença.
+                Muito obrigada por todo carinho,
+                apoio e solidariedade.
+
+            </p>
+
+
+            <span class="heart">
+                ♥
+            </span>
+
+
+        </section>
+
+
+    </main>
+
+
+
+
+    <!-- =========================
+         RODAPÉ
+    ========================== -->
+
+    <footer>
+
+
+        <p>
+            Rifa Solidária • 2026
+        </p>
+
+
+        <p>
+            Sorteio em 07/10/2026
+        </p>
+
+
+    </footer>
+
+
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script src="js/scripts.js"></script>
+
+
+
+
+    <!-- =========================
+         COPIAR PIX
+    ========================== -->
+
+    <script>
+
+        function copiarPix() {
+
+            const chavePix = "61993375979";
+
+
+            navigator.clipboard
+
+                .writeText(chavePix)
+
+                .then(() => {
+
+                    alert(
+                        "Chave PIX copiada!"
+                    );
+
+                })
+
+                .catch(() => {
+
+                    alert(
+                        "Não foi possível copiar a chave PIX."
+                    );
+
+                });
+
+        }
+
+    </script>
+
+
+</body>
+
+</html>
+```

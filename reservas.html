@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Reservas | Rifa Solidária</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+
+<body>
+
+
+    <header class="hero">
+
+        <div class="hero-content">
+
+            <span class="tag">
+                ♥ RIFA SOLIDÁRIA ♥
+            </span>
+
+
+            <h1>
+                RESERVAS
+            </h1>
+
+
+            <h2>
+                CONTROLE DA RIFA
+            </h2>
+
+        </div>
+
+    </header>
+
+
+
+    <main>
+
+
+        <section class="section">
+
+            <div class="section-title">
+
+                <span>♥</span>
+
+                <h2>
+                    Pessoas e números
+                </h2>
+
+                <span>♥</span>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Pessoa
+                            </th>
+
+                            <th>
+                                Números
+                            </th>
+
+                            <th>
+                                Quantidade
+                            </th>
+
+                            <th>
+                                Total
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="reservasTabela">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div
+                id="resumoReservas"
+                class="selection-box"
+            >
+
+            </div>
+
+
+            <a
+                href="index.html"
+                class="reservas-link"
+            >
+
+                ← Voltar para os números
+
+            </a>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <footer>
+
+        <p>
+            Rifa Solidária • 2026
+        </p>
+
+        <p>
+            Sorteio em 07/10/2026
+        </p>
+
+    </footer>
+
+
+
+    <script>
+
+        const SUPABASE_URL =
+            "https://ndtykmmfntaoixbskglw.supabase.co";
+
+
+        const SUPABASE_KEY =
+            "sb_publishable_D7dMRtUAABCSP3g6znZSEg_3n-cqYiz";
+
+
+        const { createClient } =
+            supabase;
+
+
+        const banco =
+            createClient(
+                SUPABASE_URL,
+                SUPABASE_KEY
+            );
+
+
+        const tabela =
+            document.getElementById(
+                "reservasTabela"
+            );
+
+
+        const resumo =
+            document.getElementById(
+                "resumoReservas"
+            );
+
+
+        const valorPorNumero = 10;
+
+
+        async function carregarReservas() {
+
+            const { data, error } =
+                await banco
+
+                    .from("rifa_numeros")
+
+                    .select(
+                        "numero, nome, status"
+                    )
+
+                    .in(
+                        "status",
+                        [
+                            "reservado",
+                            "pago"
+                        ]
+                    )
+
+                    .order(
+                        "numero",
+                        {
+                            ascending: true
+                        }
+                    );
+
+
+            if (error) {
+
+                console.error(
+                    error
+                );
+
+
+                tabela.innerHTML = `
+
+                    <tr>
+
+                        <td colspan="4">
+
+                            Não foi possível
+                            carregar as reservas.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+            }
+
+
+            if (
+                data.length === 0
+            ) {
+
+                tabela.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="4"
+                        >
+
+                            Nenhuma reserva cadastrada.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+            }
+
+
+            // =================================
+            // AGRUPAR POR NOME
+            // =================================
+
+            const pessoas = {};
+
+
+            data.forEach(item => {
+
+                const nome =
+                    item.nome ||
+                    "Sem nome";
+
+
+                if (
+                    !pessoas[nome]
+                ) {
+
+                    pessoas[nome] = [];
+
+                }
+
+
+                pessoas[nome].push(
+                    item.numero
+                );
+
+            });
+
+
+            // =================================
+            // CRIAR TABELA
+            // =================================
+
+            tabela.innerHTML = "";
+
+
+            let totalNumeros = 0;
+
+
+            Object.keys(pessoas)
+                .sort()
+                .forEach(nome => {
+
+                    const numeros =
+                        pessoas[nome]
+                            .sort(
+                                (a, b) =>
+                                    a - b
+                            );
+
+
+                    const quantidade =
+                        numeros.length;
+
+
+                    const total =
+                        quantidade *
+                        valorPorNumero;
+
+
+                    totalNumeros +=
+                        quantidade;
+
+
+                    const numerosFormatados =
+                        numeros.map(
+                            numero =>
+                                String(numero)
+                                    .padStart(2, "0")
+                        );
+
+
+                    const linha =
+                        document.createElement(
+                            "tr"
+                        );
+
+
+                    linha.innerHTML = `
+
+                        <td>
+                            <strong>
+                                ${nome}
+                            </strong>
+                        </td>
+
+                        <td>
+                            ${numerosFormatados.join(", ")}
+                        </td>
+
+                        <td>
+                            ${quantidade}
+                        </td>
+
+                        <td>
+                            R$ ${total
+                                .toFixed(2)
+                                .replace(".", ",")}
+                        </td>
+
+                    `;
+
+
+                    tabela.appendChild(
+                        linha
+                    );
+
+                });
+
+
+            // =================================
+            // RESUMO
+            // =================================
+
+            resumo.innerHTML = `
+
+                <div>
+
+                    <span>
+                        NÚMEROS RESERVADOS
+                    </span>
+
+                    <strong>
+                        ${totalNumeros}
+                    </strong>
+
+                </div>
+
+                <div>
+
+                    <span>
+                        VALOR TOTAL
+                    </span>
+
+                    <strong>
+                        R$ ${(totalNumeros * valorPorNumero)
+                            .toFixed(2)
+                            .replace(".", ",")}
+                    </strong>
+
+                </div>
+
+            `;
+
+        }
+
+
+        carregarReservas();
+
+    </script>
+
+
+</body>
+
+</html>

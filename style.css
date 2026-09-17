@@ -1,0 +1,670 @@
+/* =========================================
+   CONFIGURAÇÕES GERAIS
+========================================= */
+
+:root {
+    --wine: #7a1735;
+    --wine-dark: #541025;
+    --wine-light: #9d3d5a;
+    --gold: #d5a84b;
+    --gold-light: #f0d58b;
+    --cream: #fff9f3;
+    --white: #ffffff;
+    --text: #3d3033;
+    --gray: #756b6e;
+    --green: #5b9b6b;
+    --red: #b94a5a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "DM Sans", sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   CABEÇALHO
+========================================= */
+
+.hero {
+    background: linear-gradient(
+        135deg,
+        var(--wine-dark),
+        var(--wine)
+    );
+    color: var(--white);
+    text-align: center;
+    padding: 70px 20px;
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.tag {
+    display: inline-block;
+    color: var(--gold-light);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-family: "Playfair Display", serif;
+    font-size: clamp(60px, 12vw, 110px);
+    line-height: 0.9;
+    letter-spacing: 5px;
+}
+
+.hero h2 {
+    margin-top: 15px;
+    font-size: clamp(18px, 3vw, 28px);
+    font-weight: 600;
+    letter-spacing: 2px;
+}
+
+.hero-description {
+    max-width: 650px;
+    margin: 25px auto 0;
+    font-size: 17px;
+    opacity: 0.95;
+}
+
+.hero-message {
+    margin-top: 25px;
+    font-family: "Playfair Display", serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--gold-light);
+}
+
+
+/* =========================================
+   SEÇÕES
+========================================= */
+
+.section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 65px 20px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.section-title span {
+    color: var(--gold);
+    font-size: 20px;
+}
+
+.section-title h2 {
+    font-family: "Playfair Display", serif;
+    color: var(--wine);
+    font-size: 32px;
+}
+
+.about {
+    text-align: center;
+    max-width: 850px;
+}
+
+.about p {
+    margin-bottom: 15px;
+    color: var(--gray);
+    font-size: 16px;
+}
+
+
+/* =========================================
+   PRÊMIOS
+========================================= */
+
+.prizes {
+    max-width: 1100px;
+}
+
+.prizes-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+.prize-card {
+    display: flex;
+    gap: 20px;
+    padding: 30px;
+    background: var(--white);
+    border-radius: 18px;
+    border: 1px solid #eadbdc;
+    box-shadow: 0 8px 25px rgba(84, 16, 37, 0.08);
+}
+
+.prize-icon {
+    min-width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wine);
+    color: var(--gold-light);
+    border-radius: 50%;
+    font-size: 25px;
+}
+
+.prize-number {
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.prize-content h3 {
+    margin: 5px 0;
+    color: var(--wine);
+    font-family: "Playfair Display", serif;
+    font-size: 22px;
+}
+
+.prize-content p {
+    color: var(--gray);
+    font-size: 14px;
+}
+
+.prize-business {
+    display: inline-block;
+    margin-top: 8px;
+    font-weight: 700;
+    color: var(--wine);
+}
+
+.kit-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 12px;
+}
+
+.kit-items span {
+    padding: 5px 9px;
+    background: #f8e9ed;
+    color: var(--wine);
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+
+/* =========================================
+   INFORMAÇÕES
+========================================= */
+
+.info-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 10px 20px 60px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.info-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 22px;
+    background: var(--white);
+    border-radius: 15px;
+    border: 1px solid #eadbdc;
+}
+
+.info-icon {
+    font-size: 30px;
+}
+
+.info-label {
+    display: block;
+    color: var(--gray);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.info-card strong {
+    color: var(--wine);
+    font-size: 22px;
+}
+
+
+/* =========================================
+   NÚMEROS
+========================================= */
+
+.numbers-section {
+    max-width: 1100px;
+}
+
+.numbers-description {
+    text-align: center;
+    color: var(--gray);
+    margin-bottom: 25px;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.legend > div {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    color: var(--gray);
+}
+
+.legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.legend-dot.available {
+    background: var(--white);
+    border: 2px solid var(--wine);
+}
+
+.legend-dot.selected {
+    background: var(--gold);
+}
+
+.legend-dot.reserved {
+    background: #ddd;
+}
+
+
+/* =========================================
+   GRADE DOS NÚMEROS
+========================================= */
+
+.numbers-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 8px;
+    padding: 25px;
+    background: var(--white);
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(84, 16, 37, 0.08);
+}
+
+.numbers-grid button {
+    position: relative;
+    height: 48px;
+    border-radius: 9px;
+    border: 1px solid #dfc9cd;
+    background: var(--white);
+    color: var(--wine);
+    font-family: "DM Sans", sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+
+/* NÚMERO DISPONÍVEL */
+
+.numbers-grid button.available {
+    background: var(--white);
+    color: var(--wine);
+    border-color: #dfc9cd;
+}
+
+
+/* Efeito ao passar o mouse */
+
+.numbers-grid button.available:hover {
+    background: #f8e9ed;
+    border-color: var(--wine);
+    transform: translateY(-2px);
+}
+
+
+/* NÚMERO SELECIONADO PELO USUÁRIO */
+
+.numbers-grid button.selected {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--white);
+    transform: scale(1.05);
+}
+
+
+/* =========================================
+   NÚMEROS RESERVADOS
+========================================= */
+
+.numbers-grid button.reserved {
+    background: #eeeeee;
+    border-color: #dddddd;
+    color: #999999;
+    cursor: not-allowed;
+    overflow: hidden;
+}
+
+
+/* X sobre o número reservado */
+
+.numbers-grid button.reserved::before,
+.numbers-grid button.reserved::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 75%;
+    height: 2px;
+    background: var(--red);
+    transform: translate(-50%, -50%) rotate(45deg);
+    pointer-events: none;
+}
+
+.numbers-grid button.reserved::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+
+/* =========================================
+   CAIXA DE SELEÇÃO
+========================================= */
+
+.selection-box {
+    margin-top: 25px;
+    padding: 25px;
+    background: var(--wine);
+    color: var(--white);
+    border-radius: 18px;
+    display: grid;
+    grid-template-columns: 1fr 180px;
+    gap: 20px;
+    align-items: center;
+}
+
+.selection-box > div:not(.participant-fields) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.selection-box span {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.selection-box strong {
+    font-size: 16px;
+}
+
+#totalSelecionado {
+    font-size: 24px;
+    color: var(--gold-light);
+}
+
+
+/* =========================================
+   CAMPOS DO PARTICIPANTE
+========================================= */
+
+.participant-fields {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+}
+
+.participant-fields input {
+    flex: 1;
+    padding: 13px 15px;
+    border: none;
+    border-radius: 8px;
+    font-family: "DM Sans", sans-serif;
+    font-size: 14px;
+    outline: none;
+}
+
+.participant-fields input:focus {
+    box-shadow: 0 0 0 3px var(--gold);
+}
+
+
+/* =========================================
+   BOTÃO PRINCIPAL
+========================================= */
+
+.main-button {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 9px;
+    background: var(--gold);
+    color: var(--wine-dark);
+    font-family: "DM Sans", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.main-button:hover {
+    background: var(--gold-light);
+    transform: translateY(-1px);
+}
+
+.main-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+    transform: none;
+}
+
+
+/* =========================================
+   PAGAMENTO
+========================================= */
+
+.payment {
+    max-width: 800px;
+}
+
+.pix-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 30px;
+    background: var(--white);
+    border-radius: 18px;
+    border: 1px solid #eadbdc;
+}
+
+.pix-info > span {
+    display: block;
+    color: var(--gray);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.pix-info strong {
+    display: block;
+    margin: 5px 0;
+    color: var(--wine);
+    font-size: 22px;
+}
+
+.pix-info p {
+    font-weight: 600;
+}
+
+.pix-info small {
+    color: var(--gray);
+}
+
+.pix-button {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 8px;
+    background: var(--wine);
+    color: var(--white);
+    font-family: "DM Sans", sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+
+/* =========================================
+   AGRADECIMENTO
+========================================= */
+
+.thank-you {
+    padding: 70px 20px;
+    text-align: center;
+    background: #f5e6ea;
+}
+
+.thank-you .heart {
+    color: var(--wine);
+    font-size: 30px;
+}
+
+.thank-you h2 {
+    margin: 15px 0;
+    color: var(--wine);
+    font-family: "Playfair Display", serif;
+    font-size: 30px;
+}
+
+.thank-you p {
+    max-width: 600px;
+    margin: 0 auto;
+    color: var(--gray);
+}
+
+
+/* =========================================
+   ERRO
+========================================= */
+
+.erro-rifa {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 30px;
+    color: var(--wine);
+}
+
+
+/* =========================================
+   RODAPÉ
+========================================= */
+
+footer {
+    padding: 25px 20px;
+    background: var(--wine-dark);
+    color: var(--white);
+    text-align: center;
+    font-size: 13px;
+}
+
+footer p + p {
+    margin-top: 4px;
+    opacity: 0.7;
+}
+
+
+/* =========================================
+   RESPONSIVO
+========================================= */
+
+@media (max-width: 800px) {
+
+    .prizes-container {
+        grid-template-columns: 1fr;
+    }
+
+    .info-section {
+        grid-template-columns: 1fr;
+    }
+
+    .numbers-grid {
+        grid-template-columns: repeat(6, 1fr);
+        padding: 15px;
+        gap: 6px;
+    }
+
+    .numbers-grid button {
+        height: 43px;
+        font-size: 13px;
+    }
+
+    .selection-box {
+        grid-template-columns: 1fr;
+    }
+
+    .participant-fields {
+        flex-direction: column;
+    }
+
+    .participant-fields input {
+        width: 100%;
+    }
+
+    .pix-card {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+}
+
+
+@media (max-width: 500px) {
+
+    .hero {
+        padding: 50px 18px;
+    }
+
+    .section {
+        padding: 45px 15px;
+    }
+
+    .section-title h2 {
+        font-size: 25px;
+    }
+
+    .numbers-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .legend {
+        gap: 12px;
+    }
+}
