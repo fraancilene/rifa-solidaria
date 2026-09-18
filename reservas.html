@@ -296,6 +296,22 @@
 
         </section>
 
+
+        <!-- =================================================================
+             PRÉVIA DO CARTAZ
+        ================================================================== -->
+
+        <section class="panel" aria-label="Prévia do cartaz">
+
+            <header class="panel__head">
+                <h2>Cartaz atualizado</h2>
+                <span class="panel__count">Números já reservados aparecem marcados</span>
+            </header>
+
+            <div id="previewCartaz" class="cartaz"></div>
+
+        </section>
+
     </main>
 
 
@@ -354,7 +370,8 @@
                     </div>
 
                     <p class="dialog__text">
-                        Toque num número para alternar entre pago e pendente.
+                        Toque num número para trocar a situação:
+                        pendente → pago → liberar.
                     </p>
 
                     <div class="num-toggles" id="numerosSituacao"
@@ -380,6 +397,8 @@
     <div class="toasts" id="avisos" role="status" aria-live="polite"></div>
 
 
+    <script src="js/cartaz-imagem.js"></script>
+    <script src="js/cartaz.js"></script>
     <script src="js/reservas.js"></script>
 
 

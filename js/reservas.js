@@ -165,11 +165,24 @@
         if (pessoas.length === 0) {
             atualizarIndicadores();
             mostrarEstado("vazio");
+            atualizarCartaz(data);
             return;
         }
 
         atualizarIndicadores();
         renderizar();
+        atualizarCartaz(data);
+    }
+
+    /* Redesenha o cartaz com tudo que já saiu (reservado ou pago). */
+    function atualizarCartaz(dados) {
+        if (!window.Cartaz) return;
+
+        const reservados = dados
+            .filter(item => item.status === "reservado" || item.status === "pago")
+            .map(item => Number(item.numero));
+
+        window.Cartaz.mostrar(reservados);
     }
 
 
@@ -459,8 +472,26 @@
     const areaNumeros = el("numerosSituacao");
     const resumoSituacao = el("resumoSituacao");
 
+    /* Situação de cada número dentro do diálogo, ciclo de três estados:
+       "reservado" → "pago" → "liberar" → "reservado". "liberar" significa
+       que o número sai da rifa quando a pessoa clicar em Salvar. */
+
+    const ESTADOS = ["reservado", "pago", "liberar"];
+
+    const PROXIMO = {
+        reservado: "pago",
+        pago: "liberar",
+        liberar: "reservado"
+    };
+
+    const ROTULO_ESTADO = {
+        reservado: "pendente",
+        pago: "pago",
+        liberar: "vai ser liberado"
+    };
+
     let emEdicao = null;
-    let situacoes = new Map();   // numero -> pago (rascunho, só grava ao salvar)
+    let situacoes = new Map();   // numero -> "reservado" | "pago" | "liberar"
 
     function abrirEdicao(nome) {
         emEdicao = pessoas.find(p => p.nome === nome);
@@ -475,7 +506,9 @@
 
         campoNome.value = emEdicao.nome === "Sem nome" ? "" : emEdicao.nome;
 
-        situacoes = new Map(emEdicao.numeros.map(n => [n.numero, n.pago]));
+        situacoes = new Map(
+            emEdicao.numeros.map(n => [n.numero, n.pago ? "pago" : "reservado"])
+        );
 
         montarNumeros();
         conferirNome();
@@ -491,15 +524,15 @@
     function montarNumeros() {
         areaNumeros.innerHTML = "";
 
-        for (const [numero, pago] of situacoes) {
+        for (const [numero, estado] of situacoes) {
             const botao = document.createElement("button");
             botao.type = "button";
             botao.className = "num-toggle";
             botao.dataset.numero = String(numero);
-            botao.setAttribute("aria-pressed", String(pago));
+            botao.dataset.estado = estado;
             botao.setAttribute(
                 "aria-label",
-                `Número ${dois(numero)}: ${pago ? "pago" : "pendente"}`
+                `Número ${dois(numero)}: ${ROTULO_ESTADO[estado]}`
             );
 
             const rotulo = document.createElement("span");
@@ -513,33 +546,45 @@
     }
 
     function atualizarResumoSituacao() {
-        const total = situacoes.size;
-        const pagos = [...situacoes.values()].filter(Boolean).length;
+        const valores = [...situacoes.values()];
+        const total = valores.length;
+        const pagos = valores.filter(v => v === "pago").length;
+        const liberar = valores.filter(v => v === "liberar").length;
 
-        resumoSituacao.textContent =
-            `${pagos} de ${total} ${total === 1 ? "pago" : "pagos"} • ` +
-            `${moeda.format(pagos * VALOR_POR_NUMERO)} confirmados`;
+        const partes = [
+            `${pagos} de ${total} ${total === 1 ? "pago" : "pagos"}`
+        ];
 
-        resumoSituacao.removeAttribute("data-tipo");
+        if (liberar) {
+            partes.push(
+                `${liberar} ${liberar === 1 ? "será liberado" : "serão liberados"}`
+            );
+        } else {
+            partes.push(`${moeda.format(pagos * VALOR_POR_NUMERO)} confirmados`);
+        }
+
+        resumoSituacao.textContent = partes.join(" • ");
+
+        resumoSituacao.dataset.tipo = liberar ? "aviso" : "";
     }
 
     function alternarNumero(botao) {
         const numero = Number(botao.dataset.numero);
-        const pago = !situacoes.get(numero);
+        const estado = PROXIMO[situacoes.get(numero)] || "reservado";
 
-        situacoes.set(numero, pago);
+        situacoes.set(numero, estado);
 
-        botao.setAttribute("aria-pressed", String(pago));
+        botao.dataset.estado = estado;
         botao.setAttribute(
             "aria-label",
-            `Número ${dois(numero)}: ${pago ? "pago" : "pendente"}`
+            `Número ${dois(numero)}: ${ROTULO_ESTADO[estado]}`
         );
 
         atualizarResumoSituacao();
     }
 
-    function marcarTodos(pago) {
-        for (const numero of situacoes.keys()) situacoes.set(numero, pago);
+    function marcarTodos(estado) {
+        for (const numero of situacoes.keys()) situacoes.set(numero, estado);
         montarNumeros();
     }
 
@@ -548,8 +593,8 @@
         if (botao) alternarNumero(botao);
     });
 
-    el("marcarTodosPagos").addEventListener("click", () => marcarTodos(true));
-    el("marcarTodosPendentes").addEventListener("click", () => marcarTodos(false));
+    el("marcarTodosPagos").addEventListener("click", () => marcarTodos("pago"));
+    el("marcarTodosPendentes").addEventListener("click", () => marcarTodos("reservado"));
 
     /* Avisa, enquanto a pessoa digita, se o nome vai se juntar a outro. */
     function conferirNome() {
@@ -594,17 +639,29 @@
         const anterior = emEdicao.nome;
         const mudouNome = novo !== anterior;
 
-        /* Quais números mudaram de situação */
+        /* Separa cada número pelo que ele virou no rascunho. */
         const viraramPagos = [];
         const viraramPendentes = [];
+        const liberar = [];
 
         for (const item of emEdicao.numeros) {
             const agora = situacoes.get(item.numero);
-            if (agora === item.pago) continue;
-            (agora ? viraramPagos : viraramPendentes).push(item.numero);
+            const antes = item.pago ? "pago" : "reservado";
+
+            if (agora === "liberar") {
+                liberar.push(item.numero);
+            } else if (agora !== antes) {
+                (agora === "pago" ? viraramPagos : viraramPendentes).push(item.numero);
+            }
         }
 
-        if (!mudouNome && viraramPagos.length === 0 && viraramPendentes.length === 0) {
+        const nada =
+            !mudouNome &&
+            viraramPagos.length === 0 &&
+            viraramPendentes.length === 0 &&
+            liberar.length === 0;
+
+        if (nada) {
             dialogo.close();
             return;
         }
@@ -612,36 +669,75 @@
         salvarNome.disabled = true;
         salvarNome.textContent = "Salvando…";
 
-        /* Uma escrita por grupo de mudança, em vez de uma por número */
+        /* Só troca o nome para os que continuam na rifa. */
+        const numerosQueFicam = emEdicao.numeros
+            .map(n => n.numero)
+            .filter(n => !liberar.includes(n));
+
+        /* Uma escrita por grupo de mudança, em vez de uma por número.
+           Cada resposta pede return=representation: assim conseguimos ver
+           se o banco de fato aplicou a mudança ou se a política de acesso
+           engoliu o pedido em silêncio (HTTP 200 e nenhuma linha alterada). */
+
         const escritas = [];
 
-        if (mudouNome) {
-            escritas.push(
-                banco
+        if (mudouNome && numerosQueFicam.length) {
+            escritas.push({
+                nome: "nome",
+                alvo: numerosQueFicam.length,
+                promessa: banco
                     .from("rifa_numeros")
                     .update({ nome: novo })
-                    .in("numero", emEdicao.numeros.map(n => n.numero))
-            );
+                    .in("numero", numerosQueFicam)
+                    .select("numero")
+            });
         }
 
         if (viraramPagos.length) {
-            escritas.push(
-                banco.from("rifa_numeros").update({ status: "pago" }).in("numero", viraramPagos)
-            );
+            escritas.push({
+                nome: "pago",
+                alvo: viraramPagos.length,
+                promessa: banco
+                    .from("rifa_numeros")
+                    .update({ status: "pago" })
+                    .in("numero", viraramPagos)
+                    .select("numero")
+            });
         }
 
         if (viraramPendentes.length) {
-            escritas.push(
-                banco.from("rifa_numeros").update({ status: "reservado" }).in("numero", viraramPendentes)
-            );
+            escritas.push({
+                nome: "pendente",
+                alvo: viraramPendentes.length,
+                promessa: banco
+                    .from("rifa_numeros")
+                    .update({ status: "reservado" })
+                    .in("numero", viraramPendentes)
+                    .select("numero")
+            });
         }
 
-        const respostas = await Promise.all(escritas);
-        const falha = respostas.find(r => r && r.error);
+        if (liberar.length) {
+            /* "Liberar" não apaga a linha — os 150 registros já existem
+               desde a criação da rifa. Volta para o estado inicial. */
+            escritas.push({
+                nome: "liberar",
+                alvo: liberar.length,
+                promessa: banco
+                    .from("rifa_numeros")
+                    .update({ status: "disponivel", nome: null })
+                    .in("numero", liberar)
+                    .select("numero")
+            });
+        }
+
+        const respostas = await Promise.all(escritas.map(e => e.promessa));
 
         salvarNome.disabled = false;
         salvarNome.textContent = "Salvar";
 
+        /* Erro cru vindo do PostgREST. */
+        const falha = respostas.find(r => r && r.error);
         if (falha) {
             console.error("Erro ao salvar a reserva:", falha.error);
             dicaDialogo.textContent =
@@ -650,9 +746,28 @@
             return;
         }
 
+        /* HTTP 200 mas nenhuma linha alterada — quase sempre uma policy de
+           UPDATE/DELETE ausente no Supabase. Explica o que falta em vez de
+           dizer que salvou. */
+        const bloqueada = respostas
+            .map((r, i) => ({ acao: escritas[i], linhas: (r.data || []).length }))
+            .find(x => x.linhas === 0);
+
+        if (bloqueada) {
+            console.warn(
+                `Ação "${bloqueada.acao.nome}" não afetou nenhuma linha. ` +
+                `Verifique a policy de UPDATE em rifa_numeros no Supabase.`
+            );
+            dicaDialogo.textContent =
+                "O banco recebeu o pedido mas não aplicou nada. " +
+                "Falta liberar UPDATE em rifa_numeros no Supabase (Row Level Security).";
+            dicaDialogo.dataset.tipo = "erro";
+            return;
+        }
+
         dialogo.close();
 
-        /* Uma frase só, dizendo o que de fato mudou */
+        /* Resumo do que de fato mudou. */
         const partes = [];
 
         if (mudouNome) partes.push(`“${anterior}” agora é “${novo}”`);
@@ -666,6 +781,12 @@
         if (viraramPendentes.length) {
             partes.push(
                 `${viraramPendentes.length} ${viraramPendentes.length === 1 ? "número devolvido" : "números devolvidos"} para pendente`
+            );
+        }
+
+        if (liberar.length) {
+            partes.push(
+                `${liberar.length} ${liberar.length === 1 ? "número liberado" : "números liberados"}`
             );
         }
 
